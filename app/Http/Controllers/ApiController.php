@@ -6,11 +6,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Resident;
 
-class ResidentController extends Controller
+class ApiController extends Controller
 {
-    public function index(Request $request)
+    public function index() {
+
+    } 
+    
+    public function getResidents(Request $request)
     {
         $query = Resident::query();
+        $limit = 10;
+        if ($request->filled('limit')) {
+            $limit = $request->get('limit');
+        }
 
         if (!$request->has('sort_by')) {
             $query->orderBy('name');
@@ -30,13 +38,12 @@ class ResidentController extends Controller
             });
         }
 
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', $limit);
         $residents = $query->paginate($perPage);
-
-        return view('resident.index', compact('residents'));
+        return response()->json($residents);
     }
 
-    public function store(Request $request)
+    public function postResident(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
@@ -53,12 +60,6 @@ class ResidentController extends Controller
 
         $resident->save();
 
-        return redirect()->back()->with('success', 'Resident created successfully.');
-    }
-
-    public function ajax(Request $request)
-    {
-    
-        return view('resident.ajax');
+        return response()->json($resident);
     }
 }

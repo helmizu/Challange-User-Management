@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container p-3">
-  <h1>By Laravel DB Driver</h1>
+  <h1>By Jquery Ajax</h1>
 
   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createResidentModal">
     Create Resident
@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <form action="{{ route('residents.index') }}" method="GET" class="mt-3 mb-3">
+  <form action="{{ route('residents.ajax') }}" method="GET" class="mt-3 mb-3">
     <div class="input-group">
       <input type="text" class="form-control" placeholder="Search by Name, Email, or Identity Number"
         aria-label="Search" name="filter" value="{{ request('filter') }}">
@@ -68,7 +68,7 @@
       <tr>
         <th>#</th>
         <th>
-          <a href="{{ route('residents.index', ['sort_by' => 'name', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'name' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
+          <a href="{{ route('residents.ajax', ['sort_by' => 'name', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'name' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
             class="d-flex align-items-center gap-1 text-decoration-none text-reset">
             <span> Name </span>
             @if(request('sort_by') == 'name')
@@ -86,7 +86,7 @@
           </a>
         </th>
         <th><a
-            href="{{ route('residents.index', ['sort_by' => 'email', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'email' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
+            href="{{ route('residents.ajax', ['sort_by' => 'email', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'email' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
             class="d-flex align-items-center gap-1 text-decoration-none text-reset">
             <span> Email </span>
             @if(request('sort_by') == 'email')
@@ -104,7 +104,7 @@
           </a>
         </th>
         <th><a
-            href="{{ route('residents.index', ['sort_by' => 'address', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'address' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
+            href="{{ route('residents.ajax', ['sort_by' => 'address', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'address' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
             class="d-flex align-items-center gap-1 text-decoration-none text-reset">
             <span> Address </span>
             @if(request('sort_by') == 'address')
@@ -122,7 +122,7 @@
           </a>
         </th>
         <th><a
-            href="{{ route('residents.index', ['sort_by' => 'identity_number', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'identity_number' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
+            href="{{ route('residents.ajax', ['sort_by' => 'identity_number', 'sort_dir' => request('sort_dir', 'asc') == 'asc' && request('sort_by', 'name') == 'identity_number' ? 'desc' : 'asc', 'filter' => request('filter')]) }}"
             class="d-flex align-items-center gap-1 text-decoration-none text-reset">
             <span> Identity Number </span>
             @if(request('sort_by') == 'identity_number')
@@ -143,56 +143,33 @@
         <th>Birthdate</th>
       </tr>
     </thead>
-    <tbody>
-      @foreach($residents as $resident)
-      <tr>
-        <td>{{ ($residents->currentPage() - 1) * $residents->perPage() + ($loop->iteration) }}</td>
-        <td>{{ $resident->name }}</td>
-        <td>{{ $resident->email }}</td>
-        <td>{{ $resident->address }}</td>
-        <td>{{ $resident->identity_number }}</td>
-        <td>{{ $resident->gender }}</td>
-        <td>{{ $resident->birthdate }}</td>
-      </tr>
-      @endforeach
+    <tbody id="residentTableBody">
     </tbody>
   </table>
 
-  @if ($residents->lastPage() > 1)
-  <nav aria-label="table pagination">
-    <ul class="pagination">
-      @if ($residents->currentPage() === 1)
+  <nav aria-label="table pagination" id="residentPagination" class="d-none">
+    <ul class="pagination" id="residentTablePagination">
       <li class="page-item disabled">
         <a class="page-link">Previous</a>
       </li>
-      @else
       <li class="page-item">
-        <a class="page-link" href="{{ paginateUrl($residents->currentPage() - 1) }}">Previous</a>
+        <a class="page-link" href="{{ paginateUrl(1) }}">Previous</a>
       </li>
-      @endif
-      @for ($i = 1; $i <= $residents->lastPage(); $i++)
-        @if ($i === $residents->currentPage())
-        <li class="page-item active">
-          <a class="page-link" href="{{ paginateUrl($i) }}">{{$i}}</a>
-        </li>
-        @else
-        <li class="page-item">
-          <a class="page-link" href="{{ paginateUrl($i) }}">{{$i}}</a>
-        </li>
-        @endif
-        @endfor
-        @if ($residents->currentPage() === $residents->lastPage())
-        <li class="page-item disabled">
-          <a class="page-link">Next</a>
-        </li>
-        @else
-        <li class="page-item">
-          <a class="page-link" href="{{ paginateUrl($residents->currentPage() + 1) }}">Next</a>
-        </li>
-        @endif
+      <li class="page-item active">
+        <a class="page-link" href="{{ paginateUrl(1) }}">{{1}}</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="{{ paginateUrl(1) }}">{{1}}</a>
+      </li>
+
+      <li class="page-item disabled">
+        <a class="page-link">Next</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="{{ paginateUrl(1) }}">Next</a>
+      </li>
     </ul>
   </nav>
-  @endif
 
 </div>
 @endsection
@@ -218,5 +195,84 @@
           document.getElementById('birthdate').value = '';
       }
   });
+
+  function setDataTable(data, page, limit) {
+    var tableBody = $('#residentTableBody');
+    tableBody.html('');
+    
+    $.each(data, function(index, resident) {
+      var tableRow = `<tr>
+                        <td><span>${((page - 1) * limit) + (index + 1)}</td>
+                        <td><span>${resident.name}</td>
+                        <td><span>${resident.email}</td>
+                        <td><span>${resident.address}</td>
+                        <td><span>${resident.identity_number}</td>
+                        <td><span>${resident.gender}</td>
+                        <td><span>${resident.birthdate}</td>
+                      </tr>`;
+      tableBody.append(tableRow);
+    });
+  }
+
+  function setPagination(meta) {
+    var pagination = $('#residentPagination');
+    var paginationBody = $('#residentTablePagination');
+    pagination.addClass('d-none');
+    paginationBody.html('');
+
+    if (meta?.last_page > 1) {
+      pagination.removeClass('d-none');
+      $.each(meta?.links || [], function(index, item) {
+        if (!item.url) {
+          var paginationItem = `<li class="page-item disabled">
+                                  <a class="page-link">${item?.label}</a>
+                                </li>`;
+          paginationBody.append(paginationItem);
+        } else {
+          var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+          var pageParams = new URLSearchParams(window.location.search);
+          var paginationParams = new URLSearchParams(item.url?.split('?')?.[1] || '');
+          pageParams.set('page', paginationParams.get('page') || 1)
+
+          var paginationItem = `<li class="page-item ${item?.active ? "active" : ''}">
+            <a class="page-link" href="${url + "?" + pageParams.toString()}">${item?.label}</a>
+            </li>`;
+            paginationBody.append(paginationItem);
+          }
+      });
+    }
+  }
+
+  function fetchResidents() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page') || 1;
+    const limit = urlParams.get('limit') || 2;
+    const sort_by = urlParams.get('sort_by') || 'name';
+    const sort_dir = urlParams.get('sort_dir') || 'asc';
+    const filter = urlParams.get('filter') || '';
+    $.ajax({
+        url: '/api/residents',
+        type: 'GET',
+        data: {
+          limit,
+          page,
+          sort_by,
+          sort_dir,
+          filter
+        },
+        success: function(response) {
+            setDataTable(response?.data, page, limit);
+            setPagination(response);
+        },
+        error: function(xhr) {
+            console.error(xhr.responseText);
+        }
+    });
+    }
+
+    // Call the fetchResidents function on initial page load
+    $(document).ready(function() {
+        fetchResidents();
+    });
 </script>
 @endsection
