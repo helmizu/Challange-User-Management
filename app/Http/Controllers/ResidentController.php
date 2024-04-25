@@ -42,13 +42,17 @@ class ResidentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:residents',
-            'address' => 'required|string',
-            'identity_number' => 'required|numeric|digits:16|unique:residents',
-        ]);
-
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'email' => 'required|email|unique:residents',
+                'address' => 'required|string',
+                'identity_number' => 'required|numeric|digits:16|unique:residents',
+            ]);
+        } catch (ValidationException $e) {
+            return redirect()->back()->withErrors($e->validator->errors())->withInput();
+        }
+        
         $resident = new Resident();
         $resident->name = $request->name;
         $resident->email = $request->email;
