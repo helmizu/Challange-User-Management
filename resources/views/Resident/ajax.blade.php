@@ -246,7 +246,7 @@
   function fetchResidents() {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get('page') || 1;
-    const limit = urlParams.get('limit') || 2;
+    const limit = urlParams.get('limit') || 10;
     const sort_by = urlParams.get('sort_by') || 'name';
     const sort_dir = urlParams.get('sort_dir') || 'asc';
     const filter = urlParams.get('filter') || '';

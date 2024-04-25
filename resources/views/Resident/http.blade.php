@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container p-3">
-  <h1>By Laravel DB Driver</h1>
+  <h1>By Laravel Http Driver</h1>
 
   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createResidentModal">
     Create Resident
