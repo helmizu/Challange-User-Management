@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+// use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 use App\Models\Resident;
 
 class ResidentController extends Controller
@@ -11,7 +12,10 @@ class ResidentController extends Controller
     public function index(Request $request)
     {
         $query = Resident::query();
-
+        $limit = 10;
+        if ($request->filled('limit')) {
+            $limit = $request->get('limit');
+        }
         if (!$request->has('sort_by')) {
             $query->orderBy('name');
         }
@@ -30,7 +34,7 @@ class ResidentController extends Controller
             });
         }
 
-        $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', $limit);
         $residents = $query->paginate($perPage);
 
         return view('resident.index', compact('residents'));
@@ -56,9 +60,21 @@ class ResidentController extends Controller
         return redirect()->back()->with('success', 'Resident created successfully.');
     }
 
-    public function ajax(Request $request)
+    public function ajax()
     {
-    
         return view('resident.ajax');
+    }
+
+    public function http(Request $request)
+    {
+        $params = $request->all();
+        $request = Request::create('/api/residents', 'GET', $params);
+        $response = Route::dispatch($request);
+        $residents = $response->getOriginalContent();
+
+        // this should using Http client, but cant do internal request due to the laravel issue.
+        // $residents = Http::get('api/residents', $params);
+
+        return view('resident.http', compact('residents'));
     }
 }
