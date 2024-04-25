@@ -20,23 +20,35 @@ class Resident extends Authenticatable
 
     public function getGenderAttribute()
     {
-        return $this->extractInfoFromKtp()['gender']; // Call the method from controller
+        return $this->extractInfoFromKtp($this->identity_number)['gender']; // Call the method from controller
     }
 
     public function getBirthdateAttribute()
     {
-        return $this->extractInfoFromKtp()['birthdate']; // Call the method from controller
+        return $this->extractInfoFromKtp($this->identity_number)['birthdate']; // Call the method from controller
     }
 
     // Method to extract gender and birthdate from KTP number (implementation details based on reference)
-    private function extractInfoFromKtp($ktpNumber)
+    private function extractInfoFromKtp($identity_number)
     {
-        // Implement logic to extract gender and birthdate based on https://dukcapil.kalbarprov.go.id/post/arti-16-digit-nomor-induk-kependudukan
-        // This might involve parsing the first 6 digits and potentially checking for a specific digit for gender
+      $gender = '';
+      $birthdate = '';
+      if (strlen($identity_number) === 16) {
+          $shortBirthdate = substr($identity_number, 6, 6);
+          $day = substr($shortBirthdate, 0, 2);
+          $month = substr($shortBirthdate, 2, 2);
+          $year = substr($shortBirthdate, 4, 2);
+          $currentYear = date('Y');
+          $actualYear = +('20' . $year) - $currentYear > 0  ? '19' . $year : '20' . $year;
+          $actualDay = ($day < 40) ? $day : $day - 40;
+          
+          $birthdate = $actualYear . '-' . $month . '-' . str_pad($actualDay, 2, '0', STR_PAD_LEFT);
+          $gender = ($day < 40) ? 'Male' : 'Female';
+      } 
 
         return [
-            'gender' => '...', // Replace with extracted gender
-            'birthdate' => '...', // Replace with extracted birthdate
+            'gender' => $gender, // Replace with extracted gender
+            'birthdate' => $birthdate, // Replace with extracted birthdate
         ];
     }
 }

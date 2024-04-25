@@ -7,53 +7,57 @@ use App\Models\Resident;
 
 class ResidentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('resident.index');
+        $query = Resident::query();
+
+        if (!$request->has('sort_by')) {
+            $query->orderBy('name');
+        }
+        if ($request->has('sort_by')) {
+            $sortColumn = $request->get('sort_by');
+            $sortDirection = $request->get('sort_dir', 'asc');
+            $query->orderBy($sortColumn, $sortDirection);
+        }
+        if ($request->filled('filter')) {
+            $filterValue = $request->get('filter');
+
+            $query->where(function ($query) use ($filterValue) {
+                $query->where('name', 'like', '%' . $filterValue . '%')
+                    ->orWhere('identity_number', 'like', '%' . $filterValue . '%')
+                    ->orWhere('email', 'like', '%' . $filterValue . '%');
+            });
+        }
+
+        $perPage = $request->get('per_page', 10);
+        $residents = $query->paginate($perPage);
+
+        return view('resident.index', compact('residents'));
     }
 
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:residents,email',
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:residents',
             'address' => 'required|string',
-            'identity_number' => 'required|string|unique:residents,identity_number|min:16|max:16',
+            'identity_number' => 'required|numeric|digits:16|unique:residents',
         ]);
 
-        $resident = new Resident;
+        $resident = new Resident();
         $resident->name = $request->name;
         $resident->email = $request->email;
         $resident->address = $request->address;
         $resident->identity_number = $request->identity_number;
+
         $resident->save();
 
-        return response()->json(['message' => 'Resident created successfully!']);
+        return redirect()->back()->with('success', 'Resident created successfully.');
     }
 
-    public function getResidents(Request $request)
+    public function retrieve()
     {
-        $residents = Resident::orderBy('name', 'asc');
-
-        // Apply filters if provided
-        if ($request->has('name')) {
-            $residents->where('name', 'like', "%{$request->name}%");
-        }
-        if ($request->has('email')) {
-            $residents->where('email', 'like', "%{$request->email}%");
-        }
-        if ($request->has('identity_number')) {
-            $residents->where('identity_number', 'like', "%{$request->identity_number}%");
-        }
-
-        // Sorting based on resident selection (implement logic based on request)
-        $sortColumn = $request->get('sort', 'name');
-        $sortOrder = $request->get('order', 'asc');
-        $residents->orderBy($sortColumn, $sortOrder);
-
-        // Pagination (implement logic for pagination using a package like laravel-pagination)
-        $perPage = 10; // Adjust per page limit as needed
-        $residents = $residents->paginate($perPage);
+        $residents = Resident::all();
 
         return response()->json($residents);
     }
